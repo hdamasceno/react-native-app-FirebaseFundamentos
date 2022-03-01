@@ -9,7 +9,11 @@ import {Routes} from './routes';
 const App = () => {
     return (
         <ThemeProvider theme={theme}>
-            <StatusBar barStyle={'light-content'} />
+            <StatusBar
+                barStyle={'dark-content'}
+                translucent
+                backgroundColor="transparent"
+            />
             <View style={styles.safeAreaView}>
                 <Routes />
             </View>
