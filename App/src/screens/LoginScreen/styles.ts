@@ -7,6 +7,7 @@ export const Container = styled.View`
     justify-content: center;
     align-items: center;
     background-color: ${({theme}) => theme.colors.TailWind.Gray[100]};
+    padding: ${RFValue(10)}px;
 `;
 
 export const UserNameTitle = styled.Text`
@@ -23,4 +24,12 @@ export const PasswordTitle = styled.Text`
     font-size: ${RFValue(22)}px;
     color: ${({theme}) => theme.colors.TailWind.Red[500]};
     margin-top: ${RFValue(10)}px;
+`;
+
+export const Account = styled.View`
+    width: 100%;
+    margin-top: 32px;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row;
 `;
