@@ -1,13 +1,23 @@
+import {getBottomSpace, getStatusBarHeight} from 'react-native-iphone-x-helper';
 import {RFValue} from 'react-native-responsive-fontsize';
 import styled from 'styled-components/native';
 
 export const Container = styled.View`
     display: flex;
     flex: 1;
-    justify-content: center;
-    align-items: center;
+
     background-color: ${({theme}) => theme.colors.TailWind.Gray[100]};
-    padding: ${RFValue(10)}px;
+`;
+
+export const Content = styled.ScrollView.attrs({
+    showsVerticalScrollbar: false,
+    contentContainerStyle: {
+        paddingBottom: getBottomSpace(),
+    },
+})`
+    width: 100%;
+    height: 100%;
+    padding: ${getStatusBarHeight() + 20}px 32px;
 `;
 
 export const UserNameTitle = styled.Text`

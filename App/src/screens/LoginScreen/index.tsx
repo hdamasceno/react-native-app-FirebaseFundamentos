@@ -1,11 +1,17 @@
 import React, {useState} from 'react';
-import {Alert} from 'react-native';
+import {Alert, KeyboardAvoidingView, Platform} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import {Button} from '@components/forms/Button';
 import {ButtonText} from '@components/forms/ButtonText';
 import {Input} from '../../components/forms/Input';
 
-import {Container, PasswordTitle, UserNameTitle, Account} from './styles';
+import {
+    Container,
+    PasswordTitle,
+    UserNameTitle,
+    Account,
+    Content,
+} from './styles';
 
 export function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -72,44 +78,49 @@ export function LoginScreen() {
 
     return (
         <Container>
-            <UserNameTitle>Email</UserNameTitle>
-            <Input
-                placeholder="Email"
-                type="secondary"
-                onChangeText={setEmail}
-                autoCorrect={false}
-                autoCapitalize="none"
-            />
-            <PasswordTitle>Senha</PasswordTitle>
-            <Input
-                placeholder="Senha"
-                type="secondary"
-                onChangeText={setPassword}
-                autoCorrect={false}
-                autoCapitalize="none"
-                secureTextEntry
-            />
-            <Button
-                title="Login"
-                type="primary"
-                onPress={handleSignInWithEmailAndPassword}
-            />
-            <Button
-                title="Criar Conta"
-                type="secondary"
-                onPress={handleCreateUserAccount}
-            />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+                <Content>
+                    <UserNameTitle>Email</UserNameTitle>
+                    <Input
+                        placeholder="Email"
+                        type="secondary"
+                        onChangeText={setEmail}
+                        autoCorrect={false}
+                        autoCapitalize="none"
+                    />
+                    <PasswordTitle>Senha</PasswordTitle>
+                    <Input
+                        placeholder="Senha"
+                        type="secondary"
+                        onChangeText={setPassword}
+                        autoCorrect={false}
+                        autoCapitalize="none"
+                        secureTextEntry
+                    />
+                    <Button
+                        title="Login"
+                        type="primary"
+                        onPress={handleSignInWithEmailAndPassword}
+                    />
+                    <Button
+                        title="Criar Conta"
+                        type="secondary"
+                        onPress={handleCreateUserAccount}
+                    />
 
-            <Account>
-                <ButtonText
-                    title="Recuperar senha"
-                    onPress={handleForgotPassword}
-                />
-                <ButtonText
-                    title="Criar minha conta"
-                    onPress={handleCreateUserAccount}
-                />
-            </Account>
+                    <Account>
+                        <ButtonText
+                            title="Recuperar senha"
+                            onPress={handleForgotPassword}
+                        />
+                        <ButtonText
+                            title="Criar minha conta"
+                            onPress={handleCreateUserAccount}
+                        />
+                    </Account>
+                </Content>
+            </KeyboardAvoidingView>
         </Container>
     );
 }

@@ -1,15 +1,27 @@
-import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {LoginScreen} from '@screens/LoginScreen';
+import React, {useEffect, useState} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import auth from '@react-native-firebase/auth';
+import {AppLoginRoutes} from './app.login.routes';
+import {AppAuthRoutes} from './app.auth.routes';
 
-const Stack = createNativeStackNavigator();
+type UserProps = {
+    uid: string;
+};
 
 export function AppRoutes() {
+    const [user, setUser] = useState<UserProps | null>(null);
+
+    useEffect(() => {
+        const subscriber = auth().onAuthStateChanged(userInfo => {
+            setUser(userInfo);
+        });
+
+        return subscriber;
+    }, []);
+
     return (
-        <Stack.Navigator
-            screenOptions={{headerShown: false}}
-            initialRouteName="Login">
-            <Stack.Screen name="Login" component={LoginScreen} />
-        </Stack.Navigator>
+        <NavigationContainer>
+            {user ? <AppAuthRoutes /> : <AppLoginRoutes />}
+        </NavigationContainer>
     );
 }
