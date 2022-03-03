@@ -5,8 +5,9 @@ import React, {
     useContext,
     useState,
 } from 'react';
-import auth from '@react-native-firebase/auth';
 import {Alert} from 'react-native';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 interface ContextProviderProps {
     children: ReactNode;
@@ -14,6 +15,8 @@ interface ContextProviderProps {
 
 interface AuthenticatedUserProps {
     id: string;
+    name: string;
+    isAdmin: boolean;
 }
 
 interface ContextProps {
@@ -21,8 +24,10 @@ interface ContextProps {
     authenticatedUser: AuthenticatedUserProps;
 
     Authenticate(email: string, senha: string): Promise<void>;
+    AuthenticateAnonymously(): Promise<void>;
     UserForgotPasswordEmailNotify(email: string): Promise<void>;
     UserCreateNewAccount(email: string, senha: string): Promise<void>;
+    UserLogout(): Promise<void>;
 }
 
 const AuthContext = createContext<ContextProps>({} as ContextProps);
@@ -32,17 +37,42 @@ export function AuthProvider({children}: ContextProviderProps) {
     const [authenticatedUser, setAuthenticatedUser] =
         useState<AuthenticatedUserProps>({} as AuthenticatedUserProps);
 
-    const handleAuthenticateUser = useCallback(
+    const handleGetUserFromFirebase = useCallback((userId: string) => {
+        firestore()
+            .collection('Usuario')
+            .doc(userId)
+            .get()
+            .then(response => {
+                if (response.exists) {
+                    const {name, isAdmin} =
+                        response.data() as AuthenticatedUserProps;
+
+                    setAuthenticatedUser({
+                        id: userId,
+                        name,
+                        isAdmin,
+                    });
+                } else {
+                    // salvar usuario na base de dados
+                }
+            });
+    }, []);
+
+    const handleSaveUserProfileAfterCreation = useCallback(
         async (email: string, senha: string) => {
             auth()
                 .signInWithEmailAndPassword(email, senha)
                 .then(({user}) => {
-                    setAuthenticatedUser({
+                    const newUser = {
                         id: user.uid,
-                    } as AuthenticatedUserProps);
-                    setIsAuthenticated(true);
+                        name: user.displayName,
+                        isAdmin: false,
+                    } as AuthenticatedUserProps;
+
+                    firestore().collection('Usuario').add(newUser);
                 })
                 .catch(error => {
+                    setIsAuthenticated(false);
                     console.log(error.code);
 
                     if (
@@ -56,6 +86,44 @@ export function AuthProvider({children}: ContextProviderProps) {
                 });
         },
         [],
+    );
+
+    const handleAuthenticateUserAnonymously = useCallback(async () => {
+        const {user} = await auth().signInAnonymously();
+        setAuthenticatedUser({
+            id: user.uid,
+        } as AuthenticatedUserProps);
+        setIsAuthenticated(true);
+    }, []);
+
+    const handleUserLogout = useCallback(async () => {
+        auth().signOut();
+        setAuthenticatedUser({} as AuthenticatedUserProps);
+        setIsAuthenticated(false);
+    }, []);
+
+    const handleAuthenticateUser = useCallback(
+        async (email: string, senha: string) => {
+            auth()
+                .signInWithEmailAndPassword(email, senha)
+                .then(({user}) => {
+                    handleGetUserFromFirebase(user.uid);
+                })
+                .catch(error => {
+                    setIsAuthenticated(false);
+                    console.log(error.code);
+
+                    if (
+                        error.code === 'auth/user-not-found' ||
+                        error.code === 'auth/wrong-password'
+                    ) {
+                        Alert.alert(
+                            'Usuário não encontrado. E-mail e/ou senha inválida!',
+                        );
+                    }
+                });
+        },
+        [handleGetUserFromFirebase],
     );
 
     const handleForgotPasswordEmailNotification = useCallback(
@@ -76,7 +144,11 @@ export function AuthProvider({children}: ContextProviderProps) {
         async (email: string, senha: string) => {
             auth()
                 .createUserWithEmailAndPassword(email, senha)
-                .then(() => Alert.alert('Usuário criado com sucesso!'))
+                .then(() => {
+                    handleSaveUserProfileAfterCreation(email, senha);
+
+                    Alert.alert('Usuário criado com sucesso!');
+                })
                 .catch(error => {
                     console.log(error.code);
 
@@ -97,7 +169,7 @@ export function AuthProvider({children}: ContextProviderProps) {
                     }
                 });
         },
-        [],
+        [handleSaveUserProfileAfterCreation],
     );
 
     return (
@@ -106,9 +178,11 @@ export function AuthProvider({children}: ContextProviderProps) {
                 isAuthenticated,
                 authenticatedUser,
                 Authenticate: handleAuthenticateUser,
+                AuthenticateAnonymously: handleAuthenticateUserAnonymously,
                 UserForgotPasswordEmailNotify:
                     handleForgotPasswordEmailNotification,
                 UserCreateNewAccount: handleCreateNewUserAccount,
+                UserLogout: handleUserLogout,
             }}>
             {children}
         </AuthContext.Provider>
