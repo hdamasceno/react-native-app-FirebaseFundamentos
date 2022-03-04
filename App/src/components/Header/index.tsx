@@ -1,8 +1,8 @@
 import React from 'react';
-import auth from '@react-native-firebase/auth';
 
 import {ButtonLogout, Container, Title} from './styles';
 import {Text} from 'react-native';
+import {useAuth} from '../../hooks/useAuth';
 
 type Props = {
     title: string;
@@ -10,8 +10,10 @@ type Props = {
 };
 
 export function Header({title, showLogoutButton = false}: Props) {
+    const {UserLogout} = useAuth();
+
     function handleLogout() {
-        auth().signOut();
+        UserLogout();
     }
 
     return (
