@@ -13,12 +13,11 @@ export function Button({
     title,
     isLoading = false,
     type = 'primary',
-    children,
     ...rest
 }: Props) {
     return (
-        <Container type={type} disabled={isLoading} {...rest}>
-            {isLoading ? {children} : <Title>{title}</Title>}
+        <Container type={type} {...rest}>
+            <Title>{title}</Title>
         </Container>
     );
 }

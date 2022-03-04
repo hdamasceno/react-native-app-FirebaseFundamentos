@@ -16,6 +16,7 @@ interface ContextProviderProps {
 interface AuthenticatedUserProps {
     id: string;
     name: string;
+    email: string;
     isAdmin: boolean;
 }
 
@@ -40,20 +41,26 @@ export function AuthProvider({children}: ContextProviderProps) {
     const handleGetUserFromFirebase = useCallback((userId: string) => {
         firestore()
             .collection('Usuario')
-            .doc(userId)
+            .where('id', '==', userId)
             .get()
             .then(response => {
-                if (response.exists) {
-                    const {name, isAdmin} =
-                        response.data() as AuthenticatedUserProps;
+                if (response.docs.length > 0) {
+                    const filtered = response.docs.filter(
+                        item => item.data().id === userId,
+                    );
+
+                    const tempUser = filtered[0].data();
 
                     setAuthenticatedUser({
                         id: userId,
-                        name,
-                        isAdmin,
+                        name: tempUser.name,
+                        email: tempUser.email,
+                        isAdmin: tempUser.isAdmin,
                     });
                 } else {
                     // salvar usuario na base de dados
+                    console.log(userId);
+                    console.log('erro ao buscar usuario no firebase');
                 }
             });
     }, []);
@@ -66,6 +73,7 @@ export function AuthProvider({children}: ContextProviderProps) {
                     const newUser = {
                         id: user.uid,
                         name: user.displayName,
+                        email,
                         isAdmin: false,
                     } as AuthenticatedUserProps;
 
