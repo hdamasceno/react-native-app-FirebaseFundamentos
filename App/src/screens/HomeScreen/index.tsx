@@ -2,12 +2,23 @@ import React, {useCallback, useEffect, useState} from 'react';
 import firestore from '@react-native-firebase/firestore';
 import {Header} from '@components/Header';
 import {ProdutoList, ProdutoProps} from './ProdutoList';
-import {Container, ContainerButtons, Button, ButtonText} from './styles';
+import {
+    Container,
+    ContainerButtons,
+    Button,
+    ButtonText,
+    FilterContainer,
+} from './styles';
+import {Input} from '@components/forms/Input';
+import {KeyboardAvoidingView, Platform} from 'react-native';
 
 export function HomeScreen() {
+    const [filterText, setFilterText] = useState<string>('');
     const [produtoList, setProdutoList] = useState<ProdutoProps[]>([]);
 
     const handleGetListFromFirebase = useCallback(() => {
+        setProdutoList([]);
+
         firestore()
             .collection('Produto')
             .get()
@@ -50,6 +61,10 @@ export function HomeScreen() {
         [handleGetListFromFirebase],
     );
 
+    const handleFiltrar = useCallback(() => {
+        console.log(filterText);
+    }, [filterText]);
+
     useEffect(() => {
         handleGetListFromFirebase();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,20 +74,30 @@ export function HomeScreen() {
         <>
             <Header title="Home" showLogoutButton />
             <Container>
-                <ContainerButtons>
-                    <Button onPress={handleAddNewProduct}>
-                        <ButtonText>Adicionar</ButtonText>
-                    </Button>
-                    <Button onPress={handleAddNewProduct}>
-                        <ButtonText>Adicionar</ButtonText>
-                    </Button>
-                    <Button onPress={handleAddNewProduct}>
-                        <ButtonText>Adicionar</ButtonText>
-                    </Button>
-                    <Button onPress={handleAddNewProduct}>
-                        <ButtonText>Adicionar</ButtonText>
-                    </Button>
-                </ContainerButtons>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+                    <ContainerButtons>
+                        <Button onPress={handleGetListFromFirebase}>
+                            <ButtonText>Atualizar</ButtonText>
+                        </Button>
+                        <Button onPress={handleAddNewProduct}>
+                            <ButtonText>Adicionar</ButtonText>
+                        </Button>
+                        <Button onPress={handleFiltrar}>
+                            <ButtonText>Filtrar</ButtonText>
+                        </Button>
+                    </ContainerButtons>
+                    <FilterContainer>
+                        <Input
+                            placeholder="Filtrar..."
+                            type="secondary"
+                            onChangeText={setFilterText}
+                            autoCorrect={false}
+                            autoCapitalize="none"
+                            secureTextEntry
+                        />
+                    </FilterContainer>
+                </KeyboardAvoidingView>
                 <ProdutoList items={produtoList} handleDelete={handleDelete} />
             </Container>
         </>
