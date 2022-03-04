@@ -40,7 +40,7 @@ export function LoginScreen() {
                     <UserNameTitle>Email</UserNameTitle>
                     <Input
                         placeholder="Email"
-                        type="primary"
+                        type="secondary"
                         onChangeText={setEmail}
                         autoCorrect={false}
                         autoCapitalize="none"
