@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
+import {KeyboardAvoidingView, Platform} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import {Header} from '@components/Header';
 import {ProdutoList, ProdutoProps} from './ProdutoList';
@@ -10,7 +11,6 @@ import {
     FilterContainer,
 } from './styles';
 import {Input} from '@components/forms/Input';
-import {KeyboardAvoidingView, Platform} from 'react-native';
 
 export function HomeScreen() {
     const [filterText, setFilterText] = useState<string>('');
@@ -55,6 +55,8 @@ export function HomeScreen() {
 
             if (produto.exists) {
                 await firestore().collection('Produto').doc(id).delete();
+                handleGetListFromFirebase();
+            } else {
                 handleGetListFromFirebase();
             }
         },
