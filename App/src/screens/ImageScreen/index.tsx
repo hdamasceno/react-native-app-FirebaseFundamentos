@@ -6,6 +6,7 @@ import storage from '@react-native-firebase/storage';
 import {File, FileProps} from '@components/File';
 import {Photo} from '@components/Photo';
 import {Button} from '@components/forms/Button';
+import {Header} from '@components/Header';
 
 import {Container, PhotoInfo} from './styles';
 
@@ -111,6 +112,7 @@ export function ImageScreen() {
 
     return (
         <Container>
+            <Header title="Fotos" showLogoutButton />
             <Photo uri={photoSelected} handlePickImage={handlePickImage} />
 
             <PhotoInfo>{photoInfo}</PhotoInfo>
